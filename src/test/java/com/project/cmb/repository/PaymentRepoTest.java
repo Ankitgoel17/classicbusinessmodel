@@ -4,6 +4,7 @@ import com.project.cmb.entity.Customer;
 import com.project.cmb.entity.Order;
 import com.project.cmb.entity.Payment;
 import com.project.cmb.entity.PaymentId;
+import com.project.cmb.projection.PaymentListView;
 import com.project.cmb.repo.CustomerRepo;
 import com.project.cmb.repo.OrderRepo;
 import com.project.cmb.repo.PaymentRepo;
@@ -34,11 +35,9 @@ class PaymentRepoTest {
 
     @BeforeEach
     void setup() {
-        // Load existing customers from real DB
         Customer customer103 = customerRepo.findById(103).orElseThrow();
         Customer customer112 = customerRepo.findById(112).orElseThrow();
 
-        // Insert parent orders first — FK constraint on payments.orderNumber
         Order o1 = new Order();
         o1.setOrderNumber(90001); o1.setOrderDate(LocalDate.of(2024, 1, 1));
         o1.setRequiredDate(LocalDate.of(2024, 1, 10));
@@ -158,7 +157,7 @@ class PaymentRepoTest {
 
     @Test
     void repo_findByCustomerNumber_shouldReturnAllPayments() {
-        List<Payment> result = paymentRepo.findById_CustomerNumber(103);
+        List<PaymentListView> result = paymentRepo.findById_CustomerNumber(103);
         assertThat(result.stream()
                 .anyMatch(p -> p.getId().getCheckNumber().equals("TEST_CHK001"))).isTrue();
         assertThat(result.stream()
@@ -167,14 +166,14 @@ class PaymentRepoTest {
 
     @Test
     void repo_findByCustomerNumber_shouldNotReturnOtherCustomers() {
-        List<Payment> result = paymentRepo.findById_CustomerNumber(103);
+        List<PaymentListView> result = paymentRepo.findById_CustomerNumber(103);
         assertThat(result.stream()
                 .allMatch(p -> p.getId().getCustomerNumber().equals(103))).isTrue();
     }
 
     @Test
     void repo_findByCustomerNumber_noMatch_shouldReturnEmpty() {
-        List<Payment> result = paymentRepo.findById_CustomerNumber(99999);
+        List<PaymentListView> result = paymentRepo.findById_CustomerNumber(99999);
         assertThat(result).isEmpty();
     }
 
@@ -182,14 +181,14 @@ class PaymentRepoTest {
 
     @Test
     void repo_findByOrderNumber_shouldReturnPayment() {
-        List<Payment> result = paymentRepo.findByOrderNumber(90001);
+        List<PaymentListView> result = paymentRepo.findByOrderNumber(90001);
         assertThat(result.stream()
                 .anyMatch(p -> p.getId().getCheckNumber().equals("TEST_CHK001"))).isTrue();
     }
 
     @Test
     void repo_findByOrderNumber_noMatch_shouldReturnEmpty() {
-        List<Payment> result = paymentRepo.findByOrderNumber(99999);
+        List<PaymentListView> result = paymentRepo.findByOrderNumber(99999);
         assertThat(result).isEmpty();
     }
 
@@ -197,7 +196,7 @@ class PaymentRepoTest {
 
     @Test
     void repo_findByDateBetween_shouldReturnPaymentsInRange() {
-        List<Payment> result = paymentRepo.findByPaymentDateBetween(
+        List<PaymentListView> result = paymentRepo.findByPaymentDateBetween(
                 LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 28));
         assertThat(result.stream()
                 .anyMatch(p -> p.getId().getCheckNumber().equals("TEST_CHK001"))).isTrue();
@@ -207,7 +206,7 @@ class PaymentRepoTest {
 
     @Test
     void repo_findByDateBetween_shouldNotReturnOutsideRange() {
-        List<Payment> result = paymentRepo.findByPaymentDateBetween(
+        List<PaymentListView> result = paymentRepo.findByPaymentDateBetween(
                 LocalDate.of(2024, 1, 1), LocalDate.of(2024, 2, 28));
         assertThat(result.stream()
                 .noneMatch(p -> p.getId().getCheckNumber().equals("TEST_CHK003"))).isTrue();
@@ -215,16 +214,16 @@ class PaymentRepoTest {
 
     @Test
     void repo_findByDateBetween_noMatch_shouldReturnEmpty() {
-        List<Payment> result = paymentRepo.findByPaymentDateBetween(
+        List<PaymentListView> result = paymentRepo.findByPaymentDateBetween(
                 LocalDate.of(2000, 1, 1), LocalDate.of(2000, 12, 31));
         assertThat(result).isEmpty();
     }
 
-    // --- findByCheckNumber ---
+    // --- findById_CheckNumberContainingIgnoreCase ---
 
     @Test
     void repo_findByCheckNumber_shouldReturnMatch() {
-        List<Payment> result = paymentRepo
+        List<PaymentListView> result = paymentRepo
                 .findById_CheckNumberContainingIgnoreCase("TEST_CHK001");
         assertThat(result.stream()
                 .anyMatch(p -> p.getId().getCheckNumber().equals("TEST_CHK001"))).isTrue();
@@ -232,7 +231,7 @@ class PaymentRepoTest {
 
     @Test
     void repo_findByCheckNumber_caseInsensitive_shouldWork() {
-        List<Payment> result = paymentRepo
+        List<PaymentListView> result = paymentRepo
                 .findById_CheckNumberContainingIgnoreCase("test_chk002");
         assertThat(result.stream()
                 .anyMatch(p -> p.getId().getCheckNumber().equals("TEST_CHK002"))).isTrue();
@@ -240,7 +239,7 @@ class PaymentRepoTest {
 
     @Test
     void repo_findByCheckNumber_noMatch_shouldReturnEmpty() {
-        List<Payment> result = paymentRepo
+        List<PaymentListView> result = paymentRepo
                 .findById_CheckNumberContainingIgnoreCase("NONEXISTENT");
         assertThat(result).isEmpty();
     }
