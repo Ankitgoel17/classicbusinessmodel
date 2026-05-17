@@ -1,6 +1,7 @@
 package com.project.cmb.repository;
 
 import com.project.cmb.entity.Office;
+import com.project.cmb.projection.OfficeListView;
 import com.project.cmb.repo.OfficeRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,50 +18,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class OfficeRepoTest {
 
-    @Autowired
-    private OfficeRepo officeRepo;
+    @Autowired private OfficeRepo officeRepo;
 
     @BeforeEach
     void setup() {
-        Office o1 = Office.builder()
-                .officeCode("T01")
-                .city("Test City A")
-                .phone("+1 111 111 1111")
-                .addressLine1("1 Test Street")
-                .country("USA")
-                .postalCode("10001")
-                .territory("NA")
-                .build();
-        officeRepo.save(o1);
-
-        Office o2 = Office.builder()
-                .officeCode("T02")
-                .city("Test City B")
-                .phone("+33 1 11 11 11 11")
-                .addressLine1("2 Test Avenue")
-                .country("France")
-                .postalCode("75001")
-                .territory("EMEA")
-                .build();
-        officeRepo.save(o2);
-
-        Office o3 = Office.builder()
-                .officeCode("T03")
-                .city("Test City C")
-                .phone("+44 111 111 1111")
-                .addressLine1("3 Test Road")
-                .country("UK")
-                .postalCode("EC1A 1BB")
-                .territory("EMEA")
-                .build();
-        officeRepo.save(o3);
+        officeRepo.save(Office.builder().officeCode("T01").city("Test City A")
+                .phone("+1 111 111 1111").addressLine1("1 Test Street")
+                .country("USA").postalCode("10001").territory("NA").build());
+        officeRepo.save(Office.builder().officeCode("T02").city("Test City B")
+                .phone("+33 1 11 11 11 11").addressLine1("2 Test Avenue")
+                .country("France").postalCode("75001").territory("EMEA").build());
+        officeRepo.save(Office.builder().officeCode("T03").city("Test City C")
+                .phone("+44 111 111 1111").addressLine1("3 Test Road")
+                .country("UK").postalCode("EC1A 1BB").territory("EMEA").build());
     }
 
+    // --- findAll ---
 
     @Test
     void repo_findAll_shouldReturnOffices() {
-        List<Office> result = officeRepo.findAll();
-        assertThat(result).isNotEmpty();
+        assertThat(officeRepo.findAll()).isNotEmpty();
     }
 
     // --- findById ---
@@ -74,41 +51,25 @@ class OfficeRepoTest {
 
     @Test
     void repo_findById_whenNotExists_shouldReturnEmpty() {
-        Optional<Office> result = officeRepo.findById("ZZZ");
-        assertThat(result).isEmpty();
+        assertThat(officeRepo.findById("ZZZ")).isEmpty();
     }
 
     // --- save ---
 
     @Test
     void repo_save_shouldPersistNewOffice() {
-        Office o = Office.builder()
-                .officeCode("T04")
-                .city("Test City D")
-                .phone("+81 11 1111 1111")
-                .addressLine1("4 Test Blvd")
-                .country("Japan")
-                .postalCode("100-0001")
-                .territory("Japan")
-                .build();
-        officeRepo.save(o);
-
+        officeRepo.save(Office.builder().officeCode("T04").city("Test City D")
+                .phone("+81 11 1111 1111").addressLine1("4 Test Blvd")
+                .country("Japan").postalCode("100-0001").territory("Japan").build());
         assertThat(officeRepo.findById("T04")).isPresent();
     }
 
     @Test
     void repo_save_shouldIncreaseCount() {
         long countBefore = officeRepo.count();
-        Office o = Office.builder()
-                .officeCode("T05")
-                .city("Test City E")
-                .phone("+65 1111 1111")
-                .addressLine1("5 Test Lane")
-                .country("Singapore")
-                .postalCode("018989")
-                .territory("APAC")
-                .build();
-        officeRepo.save(o);
+        officeRepo.save(Office.builder().officeCode("T05").city("Test City E")
+                .phone("+65 1111 1111").addressLine1("5 Test Lane")
+                .country("Singapore").postalCode("018989").territory("APAC").build());
         assertThat(officeRepo.count()).isEqualTo(countBefore + 1);
     }
 
@@ -119,7 +80,6 @@ class OfficeRepoTest {
         Office o = officeRepo.findById("T01").orElseThrow();
         o.setPhone("+1 999 999 9999");
         officeRepo.save(o);
-
         assertThat(officeRepo.findById("T01").orElseThrow().getPhone())
                 .isEqualTo("+1 999 999 9999");
     }
@@ -129,7 +89,6 @@ class OfficeRepoTest {
         Office o = officeRepo.findById("T01").orElseThrow();
         o.setPhone("+1 888 888 8888");
         officeRepo.save(o);
-
         Office updated = officeRepo.findById("T01").orElseThrow();
         assertThat(updated.getCity()).isEqualTo("Test City A");
         assertThat(updated.getCountry()).isEqualTo("USA");
@@ -154,7 +113,7 @@ class OfficeRepoTest {
 
     @Test
     void repo_findByCountryIn_shouldReturnMatchingOffices() {
-        List<Office> result = officeRepo.findByCountryIn(List.of("USA", "France"));
+        List<OfficeListView> result = officeRepo.findByCountryIn(List.of("USA", "France"));
         assertThat(result.stream()
                 .anyMatch(o -> o.getOfficeCode().equals("T01"))).isTrue();
         assertThat(result.stream()
@@ -163,20 +122,20 @@ class OfficeRepoTest {
 
     @Test
     void repo_findByCountryIn_singleCountry_shouldWork() {
-        List<Office> result = officeRepo.findByCountryIn(List.of("UK"));
+        List<OfficeListView> result = officeRepo.findByCountryIn(List.of("UK"));
         assertThat(result.stream()
                 .anyMatch(o -> o.getOfficeCode().equals("T03"))).isTrue();
     }
 
     @Test
     void repo_findByCountryIn_noMatch_shouldReturnEmpty() {
-        List<Office> result = officeRepo.findByCountryIn(List.of("Antarctica"));
+        List<OfficeListView> result = officeRepo.findByCountryIn(List.of("Antarctica"));
         assertThat(result).isEmpty();
     }
 
     @Test
     void repo_findByCountryIn_shouldNotReturnOtherCountries() {
-        List<Office> result = officeRepo.findByCountryIn(List.of("USA"));
+        List<OfficeListView> result = officeRepo.findByCountryIn(List.of("USA"));
         assertThat(result.stream()
                 .allMatch(o -> o.getCountry().equals("USA"))).isTrue();
     }
