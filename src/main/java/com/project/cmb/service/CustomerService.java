@@ -41,12 +41,4 @@ public class CustomerService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return total.divide(new BigDecimal(all.size()), 2, RoundingMode.HALF_UP);
     }
-
-    public List<Order> getOrdersByCustomer(Integer customerNumber) {
-        return orderRepo.findByCustomer_CustomerNumber(customerNumber);
-    }
-
-    public List<Payment> getPaymentsByCustomer(Integer customerNumber) {
-        return paymentRepo.findById_CustomerNumber(customerNumber);
-    }
 }
