@@ -56,7 +56,6 @@ class OfficeRepoTest {
         officeRepo.save(o3);
     }
 
-    // --- findAll ---
 
     @Test
     void repo_findAll_shouldReturnOffices() {
