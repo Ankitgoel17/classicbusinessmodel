@@ -1,3 +1,5 @@
+package com.project.cmb.repo;
+
 import com.project.cmb.entity.Customer;
 import com.project.cmb.projection.CustomerListView;
 import org.springframework.data.domain.Page;
