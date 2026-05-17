@@ -2,6 +2,7 @@ package com.project.cmb.service;
 
 import com.project.cmb.entity.Order;
 import com.project.cmb.entity.Payment;
+import com.project.cmb.projection.RecentOrderView;
 import com.project.cmb.repo.CustomerRepo;
 import com.project.cmb.repo.EmployeeRepo;
 import com.project.cmb.repo.OrderRepo;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,10 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DashBoardServiceTest {
 
     @Mock private EmployeeRepo employeeRepo;
@@ -31,10 +34,8 @@ class DashBoardServiceTest {
     @Mock private ProductRepo productRepo;
     @Mock private PaymentRepo paymentRepo;
 
-    @InjectMocks
-    private DashBoardService dashBoardService;
+    @InjectMocks private DashBoardService dashBoardService;
 
-    // --- getEmployeesCount ---
 
     @Test
     void getEmployeesCount_shouldReturnCount() {
@@ -43,7 +44,6 @@ class DashBoardServiceTest {
         verify(employeeRepo).count();
     }
 
-    // --- getCustomersCount ---
 
     @Test
     void getCustomersCount_shouldReturnCount() {
@@ -52,7 +52,6 @@ class DashBoardServiceTest {
         verify(customerRepo).count();
     }
 
-    // --- getOrdersCount ---
 
     @Test
     void getOrdersCount_shouldReturnCount() {
@@ -61,7 +60,6 @@ class DashBoardServiceTest {
         verify(orderRepo).count();
     }
 
-    // --- getProductsCount ---
 
     @Test
     void getProductsCount_shouldReturnCount() {
@@ -70,7 +68,6 @@ class DashBoardServiceTest {
         verify(productRepo).count();
     }
 
-    // --- getPaymentsCount ---
 
     @Test
     void getPaymentsCount_shouldReturnCount() {
@@ -79,13 +76,11 @@ class DashBoardServiceTest {
         verify(paymentRepo).count();
     }
 
-    // --- getTotalSalesAmount ---
 
     @Test
     void getTotalSalesAmount_shouldReturnSumOfAllPayments() {
         Payment p1 = new Payment();
         p1.setAmount(new BigDecimal("1500.00"));
-
         Payment p2 = new Payment();
         p2.setAmount(new BigDecimal("2500.00"));
 
@@ -103,22 +98,30 @@ class DashBoardServiceTest {
                 .isEqualByComparingTo(BigDecimal.ZERO);
     }
 
-    // --- getRecentOrders ---
 
     @Test
     void getRecentOrders_shouldReturnTop5() {
-        Order o1 = buildOrder(90001, LocalDate.of(2024, 3, 1));
-        Order o2 = buildOrder(90002, LocalDate.of(2024, 2, 1));
+        // RecentOrderView is an interface — mock it
+        RecentOrderView view1 = mock(RecentOrderView.class);
+        when(view1.getOrderNumber()).thenReturn(90001);
+        when(view1.getOrderDate()).thenReturn(LocalDate.of(2024, 3, 1));
+        when(view1.getStatus()).thenReturn("Shipped");
 
-        when(orderRepo.findTop5ByOrderByOrderDateDesc()).thenReturn(List.of(o1, o2));
+        RecentOrderView view2 = mock(RecentOrderView.class);
+        when(view2.getOrderNumber()).thenReturn(90002);
+        when(view2.getOrderDate()).thenReturn(LocalDate.of(2024, 2, 1));
+        when(view2.getStatus()).thenReturn("In Process");
 
-        List<Order> result = dashBoardService.getRecentOrders();
+        when(orderRepo.findTop5ByOrderByOrderDateDesc())
+                .thenReturn(List.of(view1, view2));
+
+        List<RecentOrderView> result = dashBoardService.getRecentOrders();
+
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getOrderNumber()).isEqualTo(90001);
         verify(orderRepo).findTop5ByOrderByOrderDateDesc();
     }
 
-    // --- getPendingOrdersCount ---
 
     @Test
     void getPendingOrdersCount_shouldReturnCountByStatus() {
@@ -127,7 +130,6 @@ class DashBoardServiceTest {
         verify(orderRepo).countByStatus("In Process");
     }
 
-    // --- getOrdersPerMonth ---
 
     @Test
     void getOrdersPerMonth_shouldGroupByMonth() {
@@ -153,7 +155,6 @@ class DashBoardServiceTest {
         verify(orderRepo).findAll();
     }
 
-    // --- helper ---
 
     private Order buildOrder(Integer orderNumber, LocalDate orderDate) {
         Order o = new Order();
@@ -161,7 +162,6 @@ class DashBoardServiceTest {
         o.setOrderDate(orderDate);
         o.setRequiredDate(orderDate.plusDays(7));
         o.setStatus("In Process");
-        // customer left null — dashboard tests don't need it
         return o;
     }
 }

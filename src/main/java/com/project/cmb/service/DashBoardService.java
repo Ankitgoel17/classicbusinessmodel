@@ -1,7 +1,6 @@
 package com.project.cmb.service;
-
-import com.project.cmb.entity.Order;
 import com.project.cmb.entity.Payment;
+import com.project.cmb.projection.RecentOrderView;
 import com.project.cmb.repo.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class DashBoardService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public List<Order> getRecentOrders() {
+    public List<RecentOrderView> getRecentOrders() {
         return orderRepo.findTop5ByOrderByOrderDateDesc();
     }
 
