@@ -1,6 +1,8 @@
 package com.project.cmb.repo;
 
 import com.project.cmb.entity.Order;
+import com.project.cmb.projection.OrderListView;
+import com.project.cmb.projection.RecentOrderView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,21 +14,23 @@ import java.util.List;
 @RepositoryRestResource(path = "orders")
 public interface OrderRepo extends JpaRepository<Order, Integer> {
 
-    List<Order> findByStatus(String status);
+    List<OrderListView> findByStatus(String status);
 
-    List<Order> findByCustomer_CustomerNumber(Integer customerNumber);
+    List<OrderListView> findByCustomer_CustomerNumber(
+            Integer customerNumber
+    );
 
-    Page<Order> findByCustomer_CustomerNameContainingIgnoreCase(
+    Page<OrderListView> findByCustomer_CustomerNameContainingIgnoreCase(
             String customerName,
             Pageable pageable
     );
 
-    List<Order> findByOrderDateBetween(
+    List<OrderListView> findByOrderDateBetween(
             LocalDate startDate,
             LocalDate endDate
     );
 
     long countByStatus(String status);
 
-    List<Order> findTop5ByOrderByOrderDateDesc();
+    List<RecentOrderView> findTop5ByOrderByOrderDateDesc();
 }
