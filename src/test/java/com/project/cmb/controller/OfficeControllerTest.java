@@ -31,8 +31,6 @@ class OfficeControllerTest {
     @MockBean OfficeRepo officeRepo;
     @MockBean EmployeeRepo employeeRepo;
 
-    // --- helpers ---
-
     private OfficeListView buildOfficeView(String code, String city,
                                            String country, String territory, String phone) {
         return new OfficeListView() {
@@ -66,8 +64,6 @@ class OfficeControllerTest {
         return o;
     }
 
-    // --- GET /api/v1/offices/stats ---
-
     @Test
     void getStats_shouldReturn200AndFields() throws Exception {
         when(officeRepo.count()).thenReturn(7L);
@@ -79,8 +75,6 @@ class OfficeControllerTest {
                 .andExpect(jsonPath("$.totalOffices").value(7))
                 .andExpect(jsonPath("$.totalEmployees").value(23));
     }
-
-    // --- GET /api/v1/offices/filter/country?countries=USA&countries=France ---
 
     @Test
     void filterByCountry_shouldReturn200AndList() throws Exception {
@@ -115,8 +109,6 @@ class OfficeControllerTest {
                 .andExpect(jsonPath("$.length()").value(0));
     }
 
-    // --- GET /api/v1/offices/{officeCode}/employees ---
-
     @Test
     void getEmployees_shouldReturn200AndPage() throws Exception {
         EmployeeListView emp = buildEmployeeView(1002, "Diane", "Murphy", "President");
@@ -142,8 +134,6 @@ class OfficeControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(0));
     }
 
-    // --- PUT /api/v1/offices/{officeCode}/phone/{phone} ---
-
     @Test
     void updatePhone_shouldReturn200AndUpdatedOffice() throws Exception {
         Office office = buildOffice("1", "San Francisco", "USA",
@@ -159,5 +149,16 @@ class OfficeControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.officeCode").value("1"))
                 .andExpect(jsonPath("$.phone").value("+1 650 999 9999"));
+    }
+
+    @Test
+    void updatePhone_officeNotFound_shouldReturn404() throws Exception {
+        when(officeRepo.findById("999")).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/v1/offices/999/phone/+1 999 999 9999"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 }
