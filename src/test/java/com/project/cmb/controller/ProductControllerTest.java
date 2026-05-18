@@ -215,4 +215,37 @@ class ProductControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.quantityInStock").value(150));
     }
+
+    @Test
+    void updateBuyPrice_productNotFound_shouldReturn404() throws Exception {
+        when(productRepo.findById("ZZZZZZ")).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/v1/products/ZZZZZZ/price/95.00"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void updateMsrp_productNotFound_shouldReturn404() throws Exception {
+        when(productRepo.findById("ZZZZZZ")).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/v1/products/ZZZZZZ/msrp/185.00"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void updateQuantity_productNotFound_shouldReturn404() throws Exception {
+        when(productRepo.findById("ZZZZZZ")).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/v1/products/ZZZZZZ/quantity/150"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").exists());
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.project.cmb.controller;
 
 import com.project.cmb.entity.Product;
+import com.project.cmb.exception.ResourceNotFoundException;
 import com.project.cmb.projection.ProductListView;
 import com.project.cmb.repo.ProductRepo;
 import com.project.cmb.service.ProductService;
@@ -83,7 +84,7 @@ public class ProductController {
             @PathVariable String productCode,
             @PathVariable BigDecimal buyPrice) {
         Product product = productRepo.findById(productCode)
-                .orElseThrow(() -> new RuntimeException("Product not found: " + productCode));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "productCode", productCode));
         product.setBuyPrice(buyPrice);
         return ResponseEntity.ok(productRepo.save(product));
     }
@@ -93,7 +94,7 @@ public class ProductController {
             @PathVariable String productCode,
             @PathVariable BigDecimal msrp) {
         Product product = productRepo.findById(productCode)
-                .orElseThrow(() -> new RuntimeException("Product not found: " + productCode));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "productCode", productCode));
         product.setMsrp(msrp);
         return ResponseEntity.ok(productRepo.save(product));
     }
@@ -103,7 +104,7 @@ public class ProductController {
             @PathVariable String productCode,
             @PathVariable Short quantity) {
         Product product = productRepo.findById(productCode)
-                .orElseThrow(() -> new RuntimeException("Product not found: " + productCode));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "productCode", productCode));
         product.setQuantityInStock(quantity);
         return ResponseEntity.ok(productRepo.save(product));
     }
