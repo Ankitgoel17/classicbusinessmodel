@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import com.project.cmb.exception.ResourceNotFoundException;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -125,8 +126,8 @@ class PaymentServiceTest {
         when(customerRepo.findById(999)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> paymentService.getCustomerByPayment(999))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Customer not found");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Customer");
     }
 
     // --- getOrderByPayment ---
@@ -147,7 +148,7 @@ class PaymentServiceTest {
         when(orderRepo.findById(99999)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> paymentService.getOrderByPayment(99999))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("Order not found");
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Order");
     }
 }
