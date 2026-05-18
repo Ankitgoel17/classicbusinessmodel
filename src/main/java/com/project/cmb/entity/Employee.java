@@ -1,6 +1,7 @@
 package com.project.cmb.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,19 +21,30 @@ public class Employee {
     @Column(name = "employeeNumber")
     private Integer employeeNumber;
 
-    @Column(name = "lastName")
+    @NotBlank(message = "Last name is required")
+    @Size(max = 50, message = "Last name must not exceed 50 characters")
+    @Column(name = "lastName", nullable = false)
     private String lastName;
 
-    @Column(name = "firstName")
+    @NotBlank(message = "First name is required")
+    @Size(max = 50, message = "First name must not exceed 50 characters")
+    @Column(name = "firstName", nullable = false)
     private String firstName;
 
-    @Column(name = "extension")
+    @NotBlank(message = "Extension is required")
+    @Size(max = 10, message = "Extension must not exceed 10 characters")
+    @Column(name = "extension", nullable = false)
     private String extension;
 
-    @Column(name = "email")
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email format is invalid")
+    @Size(max = 100, message = "Email must not exceed 100 characters")
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "jobTitle")
+    @NotBlank(message = "Job title is required")
+    @Size(max = 50, message = "Job title must not exceed 50 characters")
+    @Column(name = "jobTitle", nullable = false)
     private String jobTitle;
 
     @ManyToOne(fetch = FetchType.LAZY)
