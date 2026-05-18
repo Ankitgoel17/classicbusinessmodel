@@ -231,4 +231,28 @@ class PaymentControllerTest {
     }
 
 
+    // --- Not found tests ---
+
+    @Test
+    void getLinkedOrder_paymentNotFound_shouldReturn404() throws Exception {
+        when(paymentRepo.findById(new PaymentId(99999, "ZZZZZZ")))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/v1/payments/99999/ZZZZZZ/order"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void updateAmount_paymentNotFound_shouldReturn404() throws Exception {
+        when(paymentRepo.findById(new PaymentId(99999, "ZZZZZZ")))
+                .thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/v1/payments/99999/ZZZZZZ/amount/100.00"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").exists());
+    }
 }
