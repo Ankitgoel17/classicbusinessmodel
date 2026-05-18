@@ -2,8 +2,8 @@ package com.project.cmb.service;
 
 import com.project.cmb.entity.Order;
 import com.project.cmb.entity.OrderDetail;
-import com.project.cmb.entity.Payment;
 import com.project.cmb.entity.Product;
+import com.project.cmb.projection.PaymentListView;
 import com.project.cmb.repo.OrderDetailRepo;
 import com.project.cmb.repo.OrderRepo;
 import com.project.cmb.repo.PaymentRepo;
@@ -41,35 +41,56 @@ public class OrderService {
     }
 
     public BigDecimal getOrderTotal(Integer orderNumber) {
+
         return orderDetailRepo.findById_OrderNumber(orderNumber)
                 .stream()
-                .map(od -> od.getPriceEach()
-                        .multiply(new BigDecimal(od.getQuantityOrdered())))
+                .map(od ->
+                        od.getPriceEach().multiply(
+                                new BigDecimal(
+                                        od.getQuantityOrdered()
+                                )
+                        )
+                )
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal getTotalPaymentReceived(Integer orderNumber) {
+    public BigDecimal getTotalPaymentReceived(
+            Integer orderNumber) {
+
         return paymentRepo.findByOrderNumber(orderNumber)
                 .stream()
-                .map(Payment::getAmount)
+                .map(PaymentListView::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal getPendingPayment(Integer orderNumber) {
+    public BigDecimal getPendingPayment(
+            Integer orderNumber) {
+
         return getOrderTotal(orderNumber)
-                .subtract(getTotalPaymentReceived(orderNumber));
+                .subtract(
+                        getTotalPaymentReceived(orderNumber)
+                );
     }
 
     @Transactional
-    public Order createOrder(Order order, List<OrderDetail> orderDetails) {
+    public Order createOrder(
+            Order order,
+            List<OrderDetail> orderDetails) {
 
         for (OrderDetail detail : orderDetails) {
 
-            Product product = productRepo
-                    .findById(detail.getId().getProductCode())
-                    .orElseThrow(() -> new RuntimeException(
-                            "Product not found: "
-                                    + detail.getId().getProductCode()));
+            Product product =
+                    productRepo.findById(
+                                    detail.getId()
+                                            .getProductCode()
+                            )
+                            .orElseThrow(
+                                    () -> new RuntimeException(
+                                            "Product not found: "
+                                                    + detail.getId()
+                                                    .getProductCode()
+                                    )
+                            );
 
             if (product.getQuantityInStock()
                     < detail.getQuantityOrdered()) {
@@ -80,28 +101,35 @@ public class OrderService {
                                 + ". Available: "
                                 + product.getQuantityInStock()
                                 + ", Requested: "
-                                + detail.getQuantityOrdered());
+                                + detail.getQuantityOrdered()
+                );
             }
         }
 
-        Order savedOrder = orderRepo.save(order);
+        Order savedOrder =
+                orderRepo.save(order);
 
         for (OrderDetail detail : orderDetails) {
 
-            detail.getId()
-                    .setOrderNumber(savedOrder.getOrderNumber());
+            detail.getId().setOrderNumber(
+                    savedOrder.getOrderNumber()
+            );
 
             orderDetailRepo.save(detail);
 
-            Product product = productRepo
-                    .findById(detail.getId().getProductCode())
-                    .orElseThrow();
+            Product product =
+                    productRepo.findById(
+                                    detail.getId()
+                                            .getProductCode()
+                            )
+                            .orElseThrow();
 
             product.setQuantityInStock(
-                    (short) (
-                            product.getQuantityInStock()
-                                    - detail.getQuantityOrdered()
-                    )
+                    (short)
+                            (
+                                    product.getQuantityInStock()
+                                            - detail.getQuantityOrdered()
+                            )
             );
 
             productRepo.save(product);
