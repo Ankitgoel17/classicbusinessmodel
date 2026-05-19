@@ -2,12 +2,14 @@ package com.project.cmb.service;
 
 import com.project.cmb.entity.Order;
 import com.project.cmb.entity.Payment;
-import com.project.cmb.projection.RecentOrderView;
+import com.project.cmb.dto.RecentOrderDto;
 import com.project.cmb.repo.CustomerRepo;
 import com.project.cmb.repo.EmployeeRepo;
 import com.project.cmb.repo.OrderRepo;
+import com.project.cmb.repo.OrderDetailRepo;
 import com.project.cmb.repo.PaymentRepo;
 import com.project.cmb.repo.ProductRepo;
+import com.project.cmb.projection.RecentOrderView;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,11 +30,12 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class DashBoardServiceTest {
 
-    @Mock private EmployeeRepo employeeRepo;
-    @Mock private CustomerRepo customerRepo;
-    @Mock private OrderRepo orderRepo;
-    @Mock private ProductRepo productRepo;
-    @Mock private PaymentRepo paymentRepo;
+    @Mock private EmployeeRepo    employeeRepo;
+    @Mock private CustomerRepo    customerRepo;
+    @Mock private OrderRepo       orderRepo;
+    @Mock private OrderDetailRepo orderDetailRepo;
+    @Mock private ProductRepo     productRepo;
+    @Mock private PaymentRepo     paymentRepo;
 
     @InjectMocks private DashBoardService dashBoardService;
 
@@ -101,21 +104,24 @@ class DashBoardServiceTest {
 
     @Test
     void getRecentOrders_shouldReturnTop5() {
-        // RecentOrderView is an interface — mock it
         RecentOrderView view1 = mock(RecentOrderView.class);
         when(view1.getOrderNumber()).thenReturn(90001);
         when(view1.getOrderDate()).thenReturn(LocalDate.of(2024, 3, 1));
         when(view1.getStatus()).thenReturn("Shipped");
+        when(view1.getCustomer()).thenReturn(null);
 
         RecentOrderView view2 = mock(RecentOrderView.class);
         when(view2.getOrderNumber()).thenReturn(90002);
         when(view2.getOrderDate()).thenReturn(LocalDate.of(2024, 2, 1));
         when(view2.getStatus()).thenReturn("In Process");
+        when(view2.getCustomer()).thenReturn(null);
 
         when(orderRepo.findTop5ByOrderByOrderDateDesc())
                 .thenReturn(List.of(view1, view2));
+        // orderDetailRepo returns empty list → orderTotal = 0
+        when(orderDetailRepo.findById_OrderNumber(any())).thenReturn(List.of());
 
-        List<RecentOrderView> result = dashBoardService.getRecentOrders();
+        List<RecentOrderDto> result = dashBoardService.getRecentOrders();
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getOrderNumber()).isEqualTo(90001);
@@ -142,16 +148,17 @@ class DashBoardServiceTest {
         Map<String, Long> result = dashBoardService.getOrdersPerMonth();
 
         assertThat(result)
-                .containsEntry("JANUARY", 2L)
-                .containsEntry("MARCH", 1L)
-                .hasSize(2);
+                .containsEntry("Jan", 2L)
+                .containsEntry("Mar", 1L)
+                .hasSize(12); // all 12 months present (others = 0)
         verify(orderRepo).findAll();
     }
 
     @Test
     void getOrdersPerMonth_noOrders_shouldReturnEmptyMap() {
         when(orderRepo.findAll()).thenReturn(List.of());
-        assertThat(dashBoardService.getOrdersPerMonth()).isEmpty();
+        // now always returns 12 entries (all with count 0)
+        assertThat(dashBoardService.getOrdersPerMonth()).hasSize(12);
         verify(orderRepo).findAll();
     }
 
