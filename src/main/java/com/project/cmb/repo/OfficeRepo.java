@@ -11,4 +11,5 @@ import java.util.List;
 @RepositoryRestResource(path = "office")
 public interface OfficeRepo extends JpaRepository<Office, String> {
     List<OfficeListView> findByCountryIn(List<String> countries);
+
 }
