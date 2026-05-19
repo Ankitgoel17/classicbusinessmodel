@@ -1,12 +1,14 @@
 package com.project.cmb.repo;
 
 import com.project.cmb.entity.Employee;
+import com.project.cmb.projection.EmployeeDetailView;
 import com.project.cmb.projection.EmployeeListView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import java.util.List;
+import java.util.Optional;
 
 @RepositoryRestResource(path = "employees")
 public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
@@ -23,5 +25,7 @@ public interface EmployeeRepo extends JpaRepository<Employee, Integer> {
     List<EmployeeListView> findByReportsToIsNull();
 
     long countByOffice_OfficeCode(String officeCode);
+
+    Optional<EmployeeDetailView> findDetailByEmployeeNumber(Integer employeeNumber);
 }
 
