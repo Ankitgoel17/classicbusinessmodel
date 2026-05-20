@@ -3,6 +3,7 @@ package com.project.cmb.controller;
 import com.project.cmb.entity.Product;
 import com.project.cmb.entity.ProductLine;
 import com.project.cmb.projection.ProductListView;
+import com.project.cmb.repo.ProductLineRepo;
 import com.project.cmb.repo.ProductRepo;
 import com.project.cmb.service.ProductService;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ class ProductControllerTest {
     ProductRepo productRepo;
     @MockitoBean
     ProductService productService;
+
+    @MockitoBean
+    ProductLineRepo productLineRepo;
 
 
     private ProductListView buildProductListView(String code, String name,

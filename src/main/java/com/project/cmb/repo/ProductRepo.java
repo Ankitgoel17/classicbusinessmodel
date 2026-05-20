@@ -20,4 +20,7 @@ public interface ProductRepo extends JpaRepository<Product, String> {
     Page<ProductListView> findByProductCodeContainingIgnoreCase(String productCode, Pageable pageable);
 
     List<ProductListView> findByQuantityInStockLessThan(Short threshold);
+
+    List<ProductListView> findAllProjectedBy();
+
 }
