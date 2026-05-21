@@ -1,5 +1,5 @@
 package com.project.cmb.controller;
-import com.project.cmb.projection.RecentOrderView;
+import com.project.cmb.dto.RecentOrderDto;
 import com.project.cmb.service.DashBoardService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,22 +72,10 @@ class DashBoardControllerTest {
 
     @Test
     void getRecentOrders_shouldReturn200AndList() throws Exception {
-        // Use concrete anonymous implementation instead of mock — Jackson can serialize it
-        RecentOrderView view1 = new RecentOrderView() {
-            public Integer getOrderNumber() { return 10100; }
-            public String getStatus() { return "Shipped"; }
-            public LocalDate getOrderDate() { return LocalDate.of(2003, 1, 6); }
-            public RecentOrderView.CustomerInfo getCustomer() { return null; }
-        };
+        RecentOrderDto dto1 = new RecentOrderDto(10100, LocalDate.of(2003, 1, 6), "Shipped", null, new java.math.BigDecimal("5432.10"));
+        RecentOrderDto dto2 = new RecentOrderDto(10101, LocalDate.of(2003, 1, 9), "In Process", null, new java.math.BigDecimal("2100.00"));
 
-        RecentOrderView view2 = new RecentOrderView() {
-            public Integer getOrderNumber() { return 10101; }
-            public String getStatus() { return "In Process"; }
-            public LocalDate getOrderDate() { return LocalDate.of(2003, 1, 9); }
-            public RecentOrderView.CustomerInfo getCustomer() { return null; }
-        };
-
-        when(dashBoardService.getRecentOrders()).thenReturn(List.of(view1, view2));
+        when(dashBoardService.getRecentOrders()).thenReturn(List.of(dto1, dto2));
 
         mockMvc.perform(get("/api/v1/dashboard/recent-orders"))
                 .andExpect(status().isOk())
