@@ -28,6 +28,7 @@ public class ProductLine {
     private String htmlDescription;
 
     @Lob
+    @Basic(fetch = FetchType.LAZY)
     @Column(name = "image", columnDefinition = "MEDIUMBLOB")
     private byte[] image;
 
